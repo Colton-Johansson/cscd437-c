@@ -18,13 +18,15 @@ void getName50(char *s);
 void getInt(int *i);
 FILE* getInFile();
 
+void getAndStorePass();
+
 int main() {
 
     //char fName[51];
     //char lName[51];
     //int int1;
     //int int2;
-    FILE *file;
+    //FILE *inFile;
 
     /*printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
@@ -33,18 +35,45 @@ int main() {
     printf("Please enter an integer: ");
     getInt(&int1);
     printf("Please enter another integer: ");
-    getInt(&int2);*/
+    getInt(&int2);
     printf("Please enter input file name (input '.txt' file must be in folder 'input_files', which must be in same directory as the C executable).\n");
     printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and the following: !@#$%%^&()_+-={}[],`~;\n");
     printf("Filename: ");
-    file = getInFile();
+    inFile = getInFile();
     printf("\n");
-    int c;
-    while ((c = getc(file)) != EOF)
-        putchar(c);
+    printf("Enter Password that is 6 or more characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+    getAndStorePass();*/
 
-    //printf("int1: %d", int1);
-    //printf("\n%s %s\n", fName, lName);
+
+    //Test vars
+    char fName[] = "Billy\0";
+    char lName[] = "Bob\0";
+    int int1 = -2147483648;
+    int int2 = -2147483648;
+    FILE *inFile = fopen("input_files/testInput.txt", "r");
+    //
+
+    long lint1 = (long) int1;
+    long lint2 = (long) int2;
+    long ladd = lint1 + lint2;
+    long lmul = lint1 * lint2;
+
+    FILE *outFile;
+    outFile = fopen("out.txt", "w");
+
+    fprintf(outFile, "Name: %s %s\n", fName, lName);
+    fprintf(outFile, "Addition: %ld\n", ladd);
+    fprintf(outFile, "Multiplication: %ld\n", lmul);
+    fprintf(outFile, "Contents of input file:\n\n");
+
+    int c;
+
+    while ((c = getc(inFile)) != EOF) { //TODO may need to look into security of getc and putc
+        putc(c, outFile);
+    }
+
+    fclose(inFile);
+    fclose(outFile);
 
 	return 0;
 }
@@ -55,7 +84,7 @@ int regex(char *regexStr, char *strToMatch) { //Returns 0 on match
     return regexec(&regex, strToMatch, 0, NULL, 0);
 }
 
-void flushStdin() { //TODO maybe revise because you have to press enter again
+void flushStdin() { //TODO revise because you have to press enter again
     int c;
     while((c = getchar()) != '\n' && c != EOF);
 }
@@ -178,4 +207,10 @@ FILE* getInFile() { //TODO still needs testing
 
 
     return outFile;
+}
+
+void getAndStorePass() {
+
+    //I'm thinking this should do all the password getting and storing so we're not passing it around a ton.
+
 }
