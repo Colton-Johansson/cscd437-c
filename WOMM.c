@@ -10,7 +10,9 @@
 #define true (1==1)
 #define false (!true)
 
-int getName50(char *s);
+void getName50(char *s);
+int regex(char *regexStr, char *strToMatch); //Returns 0 on match
+void flushStdin();
 
 int main() {
 
@@ -19,34 +21,51 @@ int main() {
 
     printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
-    printf("\nPlease enter last name (no more than 50 characters, A-Z, a-z, ', -): ");
+    printf("Please enter last name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(lName);
 
-    printf("\n%s %s", fName, lName);
+    printf("\n%s %s\n", fName, lName);
 
 	return 0;
 }
 
-int getName50(char *s) {
-
+int regex(char *regexStr, char *strToMatch) { //Returns 0 on match
     regex_t regex;
-    regcomp(&regex, "^[a-zA-Z'-]{1,50}$", REG_EXTENDED);
+    regcomp(&regex, regexStr, REG_EXTENDED);
+    return regexec(&regex, strToMatch, 0, NULL, 0);
+}
 
-    char word[51];
+void flushStdin() {
+    int c;
+    while((c = getchar()) != '\n' && c != EOF);
+}
+
+void getName50(char *s) {
+
+    char word[52];
     int match, notValid = true;
 
 
     do {
-        memset(word, '\0', 51);
+        start:
+        memset(word, '\0', 52);
         fgets(word, sizeof(word), stdin);
+
         strtok(word, "\n");
 
-        if (strlen(word) > 50) {
-            printf("Name can't be larger than 50 characters!");
-            printf("\nPlease enter name: ");
+        if (word[0] == '\n') {
+            goto end;
         }
 
-        match = regexec(&regex, word, 0, NULL, 0);
+        int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+
+        if (len > 50 || len < 1) {
+            printf("Name can't be larger than 50 characters!");
+            printf("\nPlease enter name: ");
+            goto end;
+        }
+
+        match = regex("^[a-zA-Z'-]{1,50}$", word);
 
         if (match == 0) {
 
@@ -57,8 +76,13 @@ int getName50(char *s) {
         } else {
             printf("Not a valid match!");
             printf("\nPlease enter name: ");
+            goto start;
         }
-
+        end:
+        if (notValid) {
+            flushStdin();
+        }
     } while (notValid);
-    return 0;
 }
+
+
