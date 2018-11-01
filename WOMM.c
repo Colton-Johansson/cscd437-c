@@ -34,8 +34,14 @@ int main() {
     getInt(&int1);
     printf("Please enter another integer: ");
     getInt(&int2);*/
-    printf("Please enter input file name (input file must be in folder: input_files, which is in same directory as C executable. File name must be less than 255 characters.): ");
+    printf("Please enter input file name (input '.txt' file must be in folder 'input_files', which must be in same directory as the C executable).\n");
+    printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and the following: !@#$%%^&()_+-={}[],`~;\n");
+    printf("Filename: ");
     file = getInFile();
+    printf("\n");
+    int c;
+    while ((c = getc(file)) != EOF)
+        putchar(c);
 
     //printf("int1: %d", int1);
     //printf("\n%s %s\n", fName, lName);
@@ -49,7 +55,7 @@ int regex(char *regexStr, char *strToMatch) { //Returns 0 on match
     return regexec(&regex, strToMatch, 0, NULL, 0);
 }
 
-void flushStdin() {
+void flushStdin() { //TODO maybe revise because you have to press enter again
     int c;
     while((c = getchar()) != '\n' && c != EOF);
 }
@@ -126,10 +132,50 @@ void getInt(int *i) { //TODO figure out how to not press enter after flush
     } while (notValid);
 }
 
-FILE* getInFile() {
+FILE* getInFile() { //TODO still needs testing
 
-    /*char fileName[256];
+    char fileName[258];
+    FILE *outFile = NULL;
+    int notValid = true;
+
+    do {
+        memset(fileName, '\0', 258);
+        fgets(fileName, sizeof(fileName), stdin);
+        strtok(fileName, "\n");
+
+        int len = (int) strlen(fileName); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+
+        if (len > 255 || len < 1) {
+            printf("Filename can't be larger than 255 characters!");
+            printf("\nPlease enter filename: ");
+            goto end;
+        }
 
 
-    return fopen("../input_files/a.txt", "r");*/
+        if (regex("^[a-zA-Z0-9\\!\\@\\#\\$\\%\\^\\&\\(\\)\\_\\+\\-\\=\\,\\`\\~\\;\\{\\}\\[\\]{1,255}\\.txt$", fileName) == 0) { //TODO Will not match ], even with \\]
+
+            char path[277];
+            sprintf(path, "input_files/%s", fileName);
+
+            if (fopen(path, "r")) {
+                //TODO I guess we could use strlcat for bufferoverflow protection but I don't think it's possible to get a string that big here
+                outFile = fopen(path, "r"); //Can put a copy of input_files in cmake-build-debug if your using CLion
+                notValid = false;
+            } else {
+                printf("File could not be found!");
+                printf("\nPlease enter filename: ");
+            }
+        } else {
+            printf("Not a valid '.txt' filename!");
+            printf("\nPlease enter filename: ");
+        }
+
+        end:
+        if (notValid) {
+            flushStdin();
+        }
+    } while (notValid);
+
+
+    return outFile;
 }
