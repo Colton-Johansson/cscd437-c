@@ -6,25 +6,39 @@
 #include<stdio.h>
 #include<regex.h>
 #include <memory.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #define true (1==1)
 #define false (!true)
 
-void getName50(char *s);
 int regex(char *regexStr, char *strToMatch); //Returns 0 on match
 void flushStdin();
+void getName50(char *s);
+void getInt(int *i);
+FILE* getInFile();
 
 int main() {
 
-    char fName[51];
-    char lName[51];
+    //char fName[51];
+    //char lName[51];
+    //int int1;
+    //int int2;
+    FILE *file;
 
-    printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
+    /*printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
     printf("Please enter last name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(lName);
+    printf("Please enter an integer: ");
+    getInt(&int1);
+    printf("Please enter another integer: ");
+    getInt(&int2);*/
+    printf("Please enter input file name (input file must be in folder: input_files, which is in same directory as C executable. File name must be less than 255 characters.): ");
+    file = getInFile();
 
-    printf("\n%s %s\n", fName, lName);
+    //printf("int1: %d", int1);
+    //printf("\n%s %s\n", fName, lName);
 
 	return 0;
 }
@@ -43,14 +57,13 @@ void flushStdin() {
 void getName50(char *s) {
 
     char word[52];
-    int match, notValid = true;
+    int notValid = true;
 
 
     do {
         start:
         memset(word, '\0', 52);
         fgets(word, sizeof(word), stdin);
-
         strtok(word, "\n");
 
         if (word[0] == '\n') {
@@ -65,9 +78,7 @@ void getName50(char *s) {
             goto end;
         }
 
-        match = regex("^[a-zA-Z'-]{1,50}$", word);
-
-        if (match == 0) {
+        if (regex("^[a-zA-Z'-]{1,50}$", word) == 0) {
 
             strncpy(s, word, 50);
             s[50] = '\0';
@@ -85,4 +96,40 @@ void getName50(char *s) {
     } while (notValid);
 }
 
+void getInt(int *i) { //TODO figure out how to not press enter after flush
+    char line[12];
+    int notValid = true;
+    long j;
 
+    do {
+        memset(line, '\0', 12);
+        fgets(line, sizeof(line), stdin);
+        strtok(line, "\n");
+
+
+        if (regex("^[-+]?[0-9]{1,10}$", line) == 0) {
+            j = strtol(line, NULL, 10);
+            if (j <= INT_MAX && j >= INT_MIN) {
+                *i = (int) j;
+                notValid = false;
+            } else {
+                printf("Integer is out of range of max or min int size!");
+                printf("\nPlease enter a valid int: ");
+            }
+        } else {
+            printf("Not a valid int!");
+            printf("\nPlease enter a valid int: ");
+        }
+        if (notValid) {
+            flushStdin();
+        }
+    } while (notValid);
+}
+
+FILE* getInFile() {
+
+    /*char fileName[256];
+
+
+    return fopen("../input_files/a.txt", "r");*/
+}
