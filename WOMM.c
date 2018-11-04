@@ -3,11 +3,13 @@
 //Joseph Carlson
 //Brandtly Strobeck
 
-#include<stdio.h>
-#include<regex.h>
+#include <stdio.h>
+#include <regex.h>
 #include <memory.h>
 #include <stdlib.h>
 #include <limits.h>
+
+#include <string.h>
 
 #define true (1==1)
 #define false (!true)
@@ -17,7 +19,7 @@ void flushStdin();
 void getName50(char *s);
 void getInt(int *i);
 FILE* getInFile();
-
+int testPassword();
 void getAndStorePass();
 
 int main() {
@@ -72,10 +74,20 @@ int main() {
         putc(c, outFile);
     }
 
+    getAndStorePass();
+    if (!testPassword())
+    {
+        printf("passwords match!\n");
+    }
+    else
+    {
+        printf("passwords don't match!\n");
+    }
+
     fclose(inFile);
     fclose(outFile);
 
-	return 0;
+    return 0;
 }
 
 int regex(char *regexStr, char *strToMatch) { //Returns 0 on match
@@ -209,8 +221,97 @@ FILE* getInFile() { //TODO still needs testing
     return outFile;
 }
 
-void getAndStorePass() {
+void getAndStorePass()//Still need to add the password regex and maybe look into actual encryption
+{
+    //char password[] = "Pa$swOrd12345";
+    char pass[51];
+    char* s = pass;
 
-    //I'm thinking this should do all the password getting and storing so we're not passing it around a ton.
+    char word[52];
+    int notValid = true;
+    printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+
+    do {
+        start:
+        memset(word, '\0', 52);
+        fgets(word, sizeof(word), stdin);
+        strtok(word, "\n");
+
+        if (word[0] == '\n') {
+            goto end;
+        }
+
+        int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+
+        if (len > 50 || len < 1) {
+            printf("Password can't be larger than 50 characters!");
+            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            goto end;
+        }
+
+        if (regex("^.{10,50}$", word) == 0) {//TODO UPDATE REGEX
+
+            strncpy(s, word, 50);
+            s[50] = '\0';
+            notValid = false;
+
+        } else {
+            printf("Not a valid match!");
+            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            goto start;
+        }
+        end:
+        if (notValid) {
+            flushStdin();
+        }
+    } while (notValid);
+
+
+    FILE *passFile= fopen("pass.txt", "w");
+    unsigned long i;
+    for (i = 0; i < strlen(pass); i++){
+        putc((pass[i]+33), passFile);
+    }
+    s = NULL;
+    fclose(passFile);
 
 }
+
+int testPassword()
+{
+    char passToTest[51];
+    char passOrig[51];
+    char * s = passToTest;
+    char word[52];
+    printf("\nEnter your password again: ");
+    memset(word, '\0', 52);
+    fgets(word, sizeof(word), stdin);
+    strtok(word, "\n");
+
+
+    if (word[0] == '\n') {
+        return 1;
+    }
+
+    int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+
+    if (len > 50 || len < 1) {
+         return 1;
+    }
+
+    strncpy(s, word, 50);
+    s[50] = '\0';
+
+   int n=0;
+   FILE *passFile= fopen("pass.txt", "r");
+   char c;
+   while ((c = getc(passFile)) != EOF) { //TODO may need to look into security of getc and putc
+       passOrig[n++]=((c-33)) ;
+   }
+   fclose(passFile);
+
+   return strcmp(passToTest,passOrig);
+}
+
+
+
