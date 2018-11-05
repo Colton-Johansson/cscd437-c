@@ -245,9 +245,8 @@ FILE* getInFile() { //TODO still needs testing
     return outFile;
 }
 
-void getAndStorePass()//Still need to add the password regex and maybe look into actual encryption
+void getAndStorePass()
 {
-    //char password[] = "Pa$swOrd12345";
     char pass[51];
     char* s = pass;
 
