@@ -229,7 +229,7 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
     char word[52];
     int notValid = true;
-    printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+    printf("\nPlease enter a Password that is between 10 and 50 characters long: ");
 
     do {
         start:
@@ -245,7 +245,7 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
         if (len > 50 || len < 1) {
             printf("Password can't be larger than 50 characters!");
-            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            printf("\nPlease enter a Password that is between 10 and 50 characters long: ");
             goto end;
         }
 
@@ -257,7 +257,7 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
         } else {
             printf("Not a valid match!");
-            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            printf("\nPlease enter a Password that is between 10 and 50 characters long: ");
             goto start;
         }
         end:
