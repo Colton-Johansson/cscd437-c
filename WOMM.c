@@ -39,12 +39,19 @@ int main() {
     printf("Please enter another integer: ");
     getInt(&int2);
     printf("Please enter input file name (input '.txt' file must be in folder 'input_files', which must be in same directory as the C executable).\n");
-    printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and the following: !@#$%%^&()_+-={}[],`~;\n");
+    printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and _\n");
     printf("Filename: ");
     inFile = getInFile();
     printf("\n");
-    printf("Enter Password that is 6 or more characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
-    getAndStorePass();*/
+    getAndStorePass();
+    if (!testPassword())
+    {
+        printf("passwords match!\n");
+    }
+    else
+    {
+        printf("passwords don't match!\n");
+    }*/
 
 
     //Test vars
@@ -60,6 +67,16 @@ int main() {
     long ladd = lint1 + lint2;
     long lmul = lint1 * lint2;
 
+    getAndStorePass();
+    if (!testPassword())
+    {
+        printf("passwords match!\n");
+    }
+    else
+    {
+        printf("passwords don't match!\n");
+    }
+
     FILE *outFile;
     outFile = fopen("out.txt", "w");
 
@@ -74,16 +91,6 @@ int main() {
         putc(c, outFile);
     }
 
-    getAndStorePass();
-    if (!testPassword())
-    {
-        printf("passwords match!\n");
-    }
-    else
-    {
-        printf("passwords don't match!\n");
-    }
-
     fclose(inFile);
     fclose(outFile);
 
@@ -96,7 +103,7 @@ int regex(char *regexStr, char *strToMatch) { //Returns 0 on match
     return regexec(&regex, strToMatch, 0, NULL, 0);
 }
 
-void flushStdin() { //TODO revise because you have to press enter again
+void flushStdin() {
     int c;
     while((c = getchar()) != '\n' && c != EOF);
 }
@@ -143,16 +150,39 @@ void getName50(char *s) {
     } while (notValid);
 }
 
-void getInt(int *i) { //TODO figure out how to not press enter after flush
-    char line[12];
+void getInt(int *i) {
+    char line[13];
     int notValid = true;
     long j;
 
     do {
-        memset(line, '\0', 12);
+        start:
+        memset(line, '\0', 13);
         fgets(line, sizeof(line), stdin);
         strtok(line, "\n");
 
+        if (line[0] == '\n') {
+            goto end;
+        }
+
+        int len = (int) strlen(line); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+        printf("Len: %d", len);
+
+        if (len > 10 || len < 1) {
+
+            if (len == 11 && (line[0] == '-' || line[0] == '+')) {
+                goto escape;
+            }
+            if (len == 11 && !(line[0] == '-' || line[0] == '+')) {
+                printf("Not a valid int!");
+                printf("\nPlease enter a valid int: ");
+                goto start;
+            }
+            printf("Not a valid int!");
+            printf("\nPlease enter a valid int: ");
+            goto end;
+        }
+        escape:
 
         if (regex("^[-+]?[0-9]{1,10}$", line) == 0) {
             j = strtol(line, NULL, 10);
@@ -162,11 +192,14 @@ void getInt(int *i) { //TODO figure out how to not press enter after flush
             } else {
                 printf("Integer is out of range of max or min int size!");
                 printf("\nPlease enter a valid int: ");
+                goto start;
             }
         } else {
             printf("Not a valid int!");
             printf("\nPlease enter a valid int: ");
+            goto start;
         }
+        end:
         if (notValid) {
             flushStdin();
         }
@@ -193,7 +226,7 @@ FILE* getInFile() { //TODO still needs testing
         }
 
 
-        if (regex("^[a-zA-Z0-9\\!\\@\\#\\$\\%\\^\\&\\(\\)\\_\\+\\-\\=\\,\\`\\~\\;\\{\\}\\[\\]{1,255}\\.txt$", fileName) == 0) { //TODO Will not match ], even with \\]
+        if (regex("^[a-zA-Z0-9_]{1,255}\\.txt$", fileName) == 0) {
 
             char path[277];
             sprintf(path, "input_files/%s", fileName);
@@ -229,7 +262,7 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
     char word[52];
     int notValid = true;
-    printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+    printf("\nPlease enter a Password that is between 10 and 50 characters long, may include a-z, A-Z, 0-9, and _: ");
 
     do {
         start:
@@ -245,11 +278,11 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
         if (len > 50 || len < 1) {
             printf("Password can't be larger than 50 characters!");
-            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            printf("\nPlease enter a valid password: ");
             goto end;
         }
 
-        if (regex("^.{10,50}$", word) == 0) {//TODO UPDATE REGEX
+        if (regex("^[a-zA-Z0-9_]{10,50}$", word) == 0) {
 
             strncpy(s, word, 50);
             s[50] = '\0';
@@ -257,7 +290,7 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
         } else {
             printf("Not a valid match!");
-            printf("\nPlease enter a Password that is between 10 and 50 characters long, contains AT LEAST 1 upper, AT LEAST one lower case, AT LEAST one number, and AT LEAST one punctuation: ");
+            printf("\nPlease enter a valid password: ");
             goto start;
         }
         end:
@@ -272,7 +305,6 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
     for (i = 0; i < strlen(pass); i++){
         putc((pass[i]+33), passFile);
     }
-    s = NULL;
     fclose(passFile);
 
 }
@@ -304,9 +336,9 @@ int testPassword()
 
    int n=0;
    FILE *passFile= fopen("pass.txt", "r");
-   char c;
+   int c;
    while ((c = getc(passFile)) != EOF) { //TODO may need to look into security of getc and putc
-       passOrig[n++]=((c-33)) ;
+       passOrig[n++]=((char) (c-33)) ;
    }
    fclose(passFile);
 
