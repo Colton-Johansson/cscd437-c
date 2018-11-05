@@ -299,7 +299,6 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
         }
     } while (notValid);
 
-
     FILE *passFile= fopen("pass.txt", "w");
     unsigned long i;
     for (i = 0; i < strlen(pass); i++){
