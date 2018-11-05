@@ -53,7 +53,6 @@ int main() {
         printf("passwords don't match!\n");
     }*/
 
-
     //Test vars
     char fName[] = "Billy\0";
     char lName[] = "Bob\0";
