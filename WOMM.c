@@ -8,8 +8,9 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <limits.h>
-
 #include <string.h>
+
+#include <openssl/sha.h>
 
 #define true (1==1)
 #define false (!true)
@@ -21,6 +22,7 @@ void getInt(int *i);
 FILE* getInFile();
 int testPassword();
 void getAndStorePass();
+void sha256(char *string, char outputBuffer[65]);
 
 int main() {
 
@@ -46,11 +48,11 @@ int main() {
     getAndStorePass();
     if (!testPassword())
     {
-        printf("passwords match!\n");
+        printf("Passwords match!\n");
     }
     else
     {
-        printf("passwords don't match!\n");
+        printf("Passwords don't match!\n");
     }*/
 
     //Test vars
@@ -65,16 +67,6 @@ int main() {
     long lint2 = (long) int2;
     long ladd = lint1 + lint2;
     long lmul = lint1 * lint2;
-
-    getAndStorePass();
-    if (!testPassword())
-    {
-        printf("passwords match!\n");
-    }
-    else
-    {
-        printf("passwords don't match!\n");
-    }
 
     FILE *outFile;
     outFile = fopen("out.txt", "w");
@@ -298,10 +290,13 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
         }
     } while (notValid);
 
+    char buffer[65];
+    sha256(pass, buffer);
+
     FILE *passFile= fopen("pass.txt", "w");
     unsigned long i;
-    for (i = 0; i < strlen(pass); i++){
-        putc((pass[i]+33), passFile);
+    for (i = 0; i < strlen(buffer); i++){
+        putc(buffer[i], passFile);
     }
     fclose(passFile);
 
@@ -309,9 +304,8 @@ void getAndStorePass()//Still need to add the password regex and maybe look into
 
 int testPassword()
 {
-    char passToTest[51];
-    char passOrig[51];
-    char * s = passToTest;
+    char passToTest[65];
+    char passOrig[65];
     char word[52];
     printf("\nEnter your password again: ");
     memset(word, '\0', 52);
@@ -326,22 +320,34 @@ int testPassword()
     int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
 
     if (len > 50 || len < 1) {
-         return 1;
+        return 1;
     }
 
-    strncpy(s, word, 50);
-    s[50] = '\0';
+    sha256(word, passToTest);
 
-   int n=0;
-   FILE *passFile= fopen("pass.txt", "r");
-   int c;
-   while ((c = getc(passFile)) != EOF) { //TODO may need to look into security of getc and putc
-       passOrig[n++]=((char) (c-33)) ;
-   }
-   fclose(passFile);
 
-   return strcmp(passToTest,passOrig);
+    int n=0;
+    FILE *passFile= fopen("pass.txt", "r");
+    int c;
+    while ((c = getc(passFile)) != EOF) { //TODO may need to look into security of getc and putc
+        passOrig[n++]=((char) c) ;
+    }
+    fclose(passFile);
+
+    return strcmp(passToTest,passOrig);
 }
 
-
-
+void sha256(char *string, char outputBuffer[65])
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, string, strlen(string));
+    SHA256_Final(hash, &sha256);
+    int i = 0;
+    for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        sprintf(outputBuffer + (i * 2), "%02x", hash[i]);
+    }
+    outputBuffer[64] = 0;
+}
