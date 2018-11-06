@@ -20,6 +20,7 @@ void flushStdin();
 void getName50(char *s);
 void getInt(int *i);
 FILE* getInFile();
+void getOutFile(char *outFile);
 int testPassword();
 void getAndStorePass();
 void sha256(char *string, char outputBuffer[65]);
@@ -31,6 +32,7 @@ int main() {
     int int1;
     int int2;
     FILE *inFile;
+    char outFileName[256];
 
     printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
@@ -44,7 +46,10 @@ int main() {
     printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and _\n");
     printf("Filename: ");
     inFile = getInFile();
-    printf("\n");
+    printf("Please enter output file name (type: '.txt').\n");
+    printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and _\n");
+    printf("Filename: ");
+    getOutFile(outFileName);
     getAndStorePass();
     int passMatch;
     do {
@@ -62,8 +67,7 @@ int main() {
     long ladd = lint1 + lint2;
     long lmul = lint1 * lint2;
 
-    FILE *outFile;
-    outFile = fopen("out.txt", "w");
+    FILE *outFile = fopen(outFileName, "w");
 
     fprintf(outFile, "Name: %s %s\n", fName, lName);
     fprintf(outFile, "Addition: %ld\n", ladd);
@@ -190,7 +194,7 @@ void getInt(int *i) {
     } while (notValid);
 }
 
-FILE* getInFile() { //TODO still needs testing
+FILE* getInFile() {
 
     char fileName[258];
     FILE *outFile = NULL;
@@ -238,6 +242,46 @@ FILE* getInFile() { //TODO still needs testing
 
 
     return outFile;
+}
+
+void getOutFile(char *outFile) {
+
+    char fileName[258];
+    int notValid = true;
+
+    do {
+        start:
+        memset(fileName, '\0', 258);
+        fgets(fileName, sizeof(fileName), stdin);
+        strtok(fileName, "\n");
+
+        int len = (int) strlen(fileName); //CAREFUL!! Since unsigned -> signed could be extremely negative.
+
+        if (len > 255 || len < 1) {
+            printf("Filename can't be larger than 255 characters!");
+            printf("\nPlease enter filename: ");
+            goto end;
+        }
+
+
+        if (regex("^[a-zA-Z0-9_]{1,255}\\.txt$", fileName) == 0) {
+
+            memset(outFile, '\0', 256);
+            strncpy(outFile, fileName, 255);
+            outFile[255] = '\0';
+            notValid = false;
+
+        } else {
+            printf("Not a valid '.txt' filename!");
+            printf("\nPlease enter filename: ");
+            goto start;
+        }
+
+        end:
+        if (notValid) {
+            flushStdin();
+        }
+    } while (notValid);
 }
 
 void getAndStorePass()
