@@ -26,13 +26,13 @@ void sha256(char *string, char outputBuffer[65]);
 
 int main() {
 
-    //char fName[51];
-    //char lName[51];
-    //int int1;
-    //int int2;
-    //FILE *inFile;
+    char fName[51];
+    char lName[51];
+    int int1;
+    int int2;
+    FILE *inFile;
 
-    /*printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
+    printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
     printf("Please enter last name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(lName);
@@ -46,22 +46,16 @@ int main() {
     inFile = getInFile();
     printf("\n");
     getAndStorePass();
-    if (!testPassword())
-    {
-        printf("Passwords match!\n");
-    }
-    else
-    {
-        printf("Passwords don't match!\n");
-    }*/
+    int passMatch;
+    do {
+        passMatch = testPassword();
 
-    //Test vars
-    char fName[] = "Billy\0";
-    char lName[] = "Bob\0";
-    int int1 = -2147483648;
-    int int2 = -2147483648;
-    FILE *inFile = fopen("input_files/testInput.txt", "r");
-    //
+        if (!passMatch) {
+            printf("Passwords match!\n");
+        } else {
+            printf("Passwords do not match!\n");
+        }
+    } while (passMatch);
 
     long lint1 = (long) int1;
     long lint2 = (long) int2;
@@ -74,7 +68,7 @@ int main() {
     fprintf(outFile, "Name: %s %s\n", fName, lName);
     fprintf(outFile, "Addition: %ld\n", ladd);
     fprintf(outFile, "Multiplication: %ld\n", lmul);
-    fprintf(outFile, "Contents of input file:\n\n");
+    fprintf(outFile, "Contents of input file:\n=======================\n");
 
     int c;
 
@@ -157,7 +151,6 @@ void getInt(int *i) {
         }
 
         int len = (int) strlen(line); //CAREFUL!! Since unsigned -> signed could be extremely negative.
-        printf("Len: %d", len);
 
         if (len > 10 || len < 1) {
 
@@ -204,6 +197,7 @@ FILE* getInFile() { //TODO still needs testing
     int notValid = true;
 
     do {
+        start:
         memset(fileName, '\0', 258);
         fgets(fileName, sizeof(fileName), stdin);
         strtok(fileName, "\n");
@@ -223,16 +217,17 @@ FILE* getInFile() { //TODO still needs testing
             sprintf(path, "input_files/%s", fileName);
 
             if (fopen(path, "r")) {
-                //TODO I guess we could use strlcat for bufferoverflow protection but I don't think it's possible to get a string that big here
                 outFile = fopen(path, "r"); //Can put a copy of input_files in cmake-build-debug if your using CLion
                 notValid = false;
             } else {
                 printf("File could not be found!");
                 printf("\nPlease enter filename: ");
+                goto start;
             }
         } else {
             printf("Not a valid '.txt' filename!");
             printf("\nPlease enter filename: ");
+            goto start;
         }
 
         end:
@@ -308,6 +303,8 @@ int testPassword()
     char word[52];
     printf("\nEnter your password again: ");
     memset(word, '\0', 52);
+    memset(passOrig, '\0', 65);
+    memset(passToTest, '\0', 65);
     fgets(word, sizeof(word), stdin);
     strtok(word, "\n");
 
