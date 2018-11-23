@@ -19,7 +19,7 @@ int regex(char *regexStr, char *strToMatch); //Returns 0 on match
 void flushStdin();
 void getName50(char *s);
 void getInt(int *i);
-FILE* getInFile();
+FILE* getInFile(char *inFileName);
 void getOutFile(char *outFile);
 int testPassword();
 void getAndStorePass();
@@ -33,6 +33,7 @@ int main() {
     int int2;
     FILE *inFile;
     char outFileName[256];
+    char inFileName[256];
 
     printf("Please enter first name (no more than 50 characters, A-Z, a-z, ', -): ");
     getName50(fName);
@@ -45,11 +46,16 @@ int main() {
     printf("Please enter input file name (input '.txt' file must be in folder 'input_files', which must be in same directory as the C executable).\n");
     printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and _\n");
     printf("Filename: ");
-    inFile = getInFile();
+    inFile = getInFile(inFileName);
     printf("Please enter output file name (type: '.txt').\n");
     printf("File name must be less than 255 characters, and may include a-z, A-Z, 0-9, and _\n");
     printf("Filename: ");
     getOutFile(outFileName);
+    while (strcmp(outFileName, inFileName) == 0) {
+        printf("Output file name cannot be the same as input file name!\nPlease enter valid output file name: ");
+        memset(outFileName, '\0', 256);
+        getOutFile(outFileName);
+    }
     getAndStorePass();
     int passMatch;
     do {
@@ -76,7 +82,7 @@ int main() {
 
     int c;
 
-    while ((c = getc(inFile)) != EOF) { //TODO may need to look into security of getc and putc
+    while ((c = getc(inFile)) != EOF) {
         putc(c, outFile);
     }
 
@@ -110,7 +116,9 @@ void getName50(char *s) {
         strtok(word, "\n");
 
         if (word[0] == '\n') {
-            goto end;
+            memset(word, '\0', 52);
+            printf("Please enter valid data: ");
+            goto start;
         }
 
         int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
@@ -151,7 +159,9 @@ void getInt(int *i) {
         strtok(line, "\n");
 
         if (line[0] == '\n') {
-            goto end;
+            memset(line, '\0', 13);
+            printf("Please enter valid data: ");
+            goto start;
         }
 
         int len = (int) strlen(line); //CAREFUL!! Since unsigned -> signed could be extremely negative.
@@ -194,7 +204,7 @@ void getInt(int *i) {
     } while (notValid);
 }
 
-FILE* getInFile() {
+FILE* getInFile(char *inFileName) {
 
     char fileName[258];
     FILE *outFile = NULL;
@@ -223,6 +233,7 @@ FILE* getInFile() {
             if (fopen(path, "r")) {
                 outFile = fopen(path, "r"); //Can put a copy of input_files in cmake-build-debug if your using CLion
                 notValid = false;
+
             } else {
                 printf("File could not be found!");
                 printf("\nPlease enter filename: ");
@@ -240,7 +251,8 @@ FILE* getInFile() {
         }
     } while (notValid);
 
-
+    memset(inFileName, '\0', 256);
+    strncpy(inFileName, fileName, 256);
     return outFile;
 }
 
@@ -300,7 +312,9 @@ void getAndStorePass()
         strtok(word, "\n");
 
         if (word[0] == '\n') {
-            goto end;
+            memset(word, '\0', 52);
+            printf("Please enter valid data: ");
+            goto start;
         }
 
         int len = (int) strlen(word); //CAREFUL!! Since unsigned -> signed could be extremely negative.
@@ -337,7 +351,6 @@ void getAndStorePass()
         putc(buffer[i], passFile);
     }
     fclose(passFile);
-
 }
 
 int testPassword()
@@ -369,7 +382,7 @@ int testPassword()
     int n=0;
     FILE *passFile= fopen("pass.txt", "r");
     int c;
-    while ((c = getc(passFile)) != EOF) { //TODO may need to look into security of getc and putc
+    while ((c = getc(passFile)) != EOF) {
         passOrig[n++]=((char) c) ;
     }
     fclose(passFile);
